@@ -1,17 +1,15 @@
-# Ignore build files and executables
-*.o
-*.out
-*.exe
-main
+# Ignore everything
+*
 
-# Ignore profiling and debug files
-*.nsys-rep
-*.sqlite
-*.log
+# Allow these file types
+!*.cu
+!*.c
+!*.cpp
+!*.cuh
+!*.h
+!*.txt
+!Makefile
 
-# Ignore VSCode settings (if you don't want to share)
-.vscode/
-
-# Ignore any temporary files
-*.tmp
-*.swp
+# Ignore hidden files and folders (like .vscode, .git, etc.)
+.*
+!.gitignore
