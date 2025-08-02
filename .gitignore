@@ -1,0 +1,17 @@
+# Ignore build files and executables
+*.o
+*.out
+*.exe
+main
+
+# Ignore profiling and debug files
+*.nsys-rep
+*.sqlite
+*.log
+
+# Ignore VSCode settings (if you don't want to share)
+.vscode/
+
+# Ignore any temporary files
+*.tmp
+*.swp
