@@ -10,6 +10,12 @@
 !*.txt
 !Makefile
 
-# Ignore hidden files and folders (like .vscode, .git, etc.)
+# Allow all folders (but not hidden ones like .vscode)
+!*/
+
+# Ignore hidden files and folders
 .*
 !.gitignore
+
+# Explicitly ignore .vscode folder
+.vscode/
