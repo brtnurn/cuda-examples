@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
 
     p_start = omp_get_wtime();
 
-    int count = 0;
+    /*int count = 0;
     while (p != NULL)
     {
         count++;
@@ -114,6 +114,20 @@ int main(int argc, char *argv[])
     for (int i = 0; i < count; i++)
     {
         processwork(arr[i]);
+    }*/
+
+#pragma omp parallel
+    {
+#pragma omp single
+        {
+            struct node *my_node = p;
+            while (my_node)
+            {
+#pragma omp task firstprivate(my_node)
+                processwork(my_node);
+                my_node = my_node->next;
+            }
+        }
     }
 
     p_end = omp_get_wtime();

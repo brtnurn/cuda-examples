@@ -2,6 +2,7 @@
 #include <iostream>
 #include <chrono>
 #include <cassert>
+#include <omp.h>
 
 using namespace std;
 using namespace std::chrono;
@@ -13,6 +14,7 @@ using namespace std::chrono;
 extern __global__ void kmer_parallel(char *ref, char *reads, int *counts, int ref_len, int read_len, int max_read_len, int read_count, int k);
 extern void kmer_serial(char *ref, char *reads, int *counts, int ref_len, int read_len, int max_read_len, int read_count, int k);
 extern void kmer_serial_bm(char *ref, char *reads, int *counts, int ref_len, int read_len, int max_read_len, int read_count, int k);
+extern void kmer_cpu_parallel(char *ref, char *reads, int *counts, int ref_len, int read_len, int max_read_len, int read_count, int k);
 
 int main(int argc, char *argv[])
 {
@@ -58,11 +60,17 @@ int main(int argc, char *argv[])
     int kmer_per_read = read_len - k + 1;
     int total_kmer = kmer_per_read * read_count;
 
-    int *h_counts_cpu, *h_counts_cpu_bm, *h_counts_gpu;
+    int *h_counts_cpu, *h_counts_cpu_bm, *h_counts_gpu, *h_counts_cpu_omp;
 
     h_counts_cpu = (int *)malloc(read_count * sizeof(int));
     h_counts_cpu_bm = (int *)malloc(read_count * sizeof(int));
     h_counts_gpu = (int *)malloc(read_count * sizeof(int));
+    h_counts_cpu_omp = (int *)malloc(read_count * sizeof(int));
+
+    memset(h_counts_cpu, 0, read_count * sizeof(int));
+    memset(h_counts_cpu_bm, 0, read_count * sizeof(int));
+    memset(h_counts_gpu, 0, read_count * sizeof(int));
+    memset(h_counts_cpu_omp, 0, read_count * sizeof(int));
 
     char *d_ref;
     char *d_reads;
@@ -71,6 +79,8 @@ int main(int argc, char *argv[])
     cudaMalloc(&d_ref, ref_len * sizeof(char));
     cudaMalloc(&d_reads, read_count * MAX_READ_LEN * sizeof(char));
     cudaMalloc(&d_counts, read_count * sizeof(int));
+
+    cudaMemset(d_counts, 0, read_count * sizeof(int));
 
     cudaMemcpy(d_ref, ref, ref_len * sizeof(char), cudaMemcpyHostToDevice);
     cudaMemcpy(d_reads, reads, read_count * MAX_READ_LEN * sizeof(char), cudaMemcpyHostToDevice);
@@ -97,9 +107,15 @@ int main(int argc, char *argv[])
     duration = duration_cast<microseconds>(stop - start);
     cout << "Time taken by gpu function: " << duration.count() << " microseconds" << endl;
 
-    char *result_reads = (char *)malloc(read_count * sizeof(char));
+    start = high_resolution_clock::now();
+    kmer_cpu_parallel(ref, reads, h_counts_cpu_omp, ref_len, read_len, MAX_READ_LEN, read_count, k);
+    stop = high_resolution_clock::now();
+    duration = duration_cast<microseconds>(stop - start);
+    cout << "Time taken by cpu (Parallel) function: " << duration.count() << " microseconds" << endl;
 
-    cudaMemcpy(result_reads, d_reads, read_count * sizeof(char), cudaMemcpyDeviceToHost);
+    // char *result_reads = (char *)malloc(read_count * sizeof(char));
+
+    // cudaMemcpy(result_reads, d_reads, read_count * sizeof(char), cudaMemcpyDeviceToHost);
     cudaMemcpy(h_counts_gpu, d_counts, read_count * sizeof(int), cudaMemcpyDeviceToHost);
 
     fptr = fopen(out_file, "w");
@@ -120,6 +136,12 @@ int main(int argc, char *argv[])
     for (int i = 0; i < read_count; i++)
     {
         fprintf(fptr, "%d\n", h_counts_gpu[i]);
+    }
+
+    fprintf(fptr, "CPU (Parallel) Results:\n");
+    for (int i = 0; i < read_count; i++)
+    {
+        fprintf(fptr, "%d\n", h_counts_cpu_omp[i]);
     }
     fclose(fptr);
 

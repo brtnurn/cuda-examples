@@ -1,13 +1,5 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <omp.h>
-#include <stdbool.h>
-
-#define MAX_REF_LEN 1000000
-#define MAX_READ_LEN 200
-#define MAX_READ 20480
-#define THREADS 8
 
 void kmer_cpu_parallel(char *ref, char *reads, int *counts, int ref_len, int read_len, int max_read_len, int read_count, int k)
 {
@@ -42,7 +34,7 @@ void kmer_cpu_parallel(char *ref, char *reads, int *counts, int ref_len, int rea
     }
 }
 
-int main(int argc, char *argv[])
+/*int main(int argc, char *argv[])
 {
     if (argc != 5)
     {
@@ -104,4 +96,4 @@ int main(int argc, char *argv[])
         fprintf(fptr, "%d\n", counts[i]);
     }
     fclose(fptr);
-}
+}*/

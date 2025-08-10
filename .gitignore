@@ -9,6 +9,7 @@
 !*.h
 !*.txt
 !Makefile
+!*.sh
 
 # Allow all folders (but not hidden ones like .vscode)
 !*/

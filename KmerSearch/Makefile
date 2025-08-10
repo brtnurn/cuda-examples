@@ -1,6 +1,8 @@
 all:
-	nvcc main.cu kmer_serial.cu kmer_serial_bm.cu kmer_parallel.cu -o main
-	gcc -fopenmp kmer_cpu_parallel.c -o kmer_cpu_parallel
+	nvcc -Xcompiler -fopenmp main.cu kmer_serial.cu kmer_serial_bm.cu kmer_parallel.cu kmer_cpu_parallel.cu -o main
+
+run:
+	./script.sh
 
 clean:
-	rm -f main kmer_cpu_parallel
+	rm -f main out_*.txt
