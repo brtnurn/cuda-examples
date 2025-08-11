@@ -107,6 +107,8 @@ int main(int argc, char *argv[])
     duration = duration_cast<microseconds>(stop - start);
     cout << "Time taken by gpu function: " << duration.count() << " microseconds" << endl;
 
+    // omp_set_num_threads(8);
+
     start = high_resolution_clock::now();
     kmer_cpu_parallel(ref, reads, h_counts_cpu_omp, ref_len, read_len, MAX_READ_LEN, read_count, k);
     stop = high_resolution_clock::now();
